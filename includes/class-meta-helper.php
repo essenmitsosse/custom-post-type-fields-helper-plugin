@@ -104,7 +104,7 @@ class CPT_Meta_Helper {
 		), $args );
 
 		$input_name = $args['name'];
-		if ( is_string( $args['desc'] ) && strlen( $args['desc'] ) > 0 ) {
+		if ( array_key_exists( 'desc', $args ) && is_string( $args['desc'] ) && strlen( $args['desc'] ) > 0 ) {
 			$input_name .= '_' . $args['desc'];
 		}
 
@@ -115,9 +115,9 @@ class CPT_Meta_Helper {
 			'input_name' => $input_name,
 		) ) );
 		if ( $args['text_area'] ) {
-			$content[] = '<textarea class="cpt-input-' . $args['desc'] . ' cpt-input cpt-textarea cpt-input-content" " name="' . $input_name . '">' . $args['value'] . '</textarea>';
+			$content[] = '<textarea class="cpt-input cpt-textarea cpt-input-content" " name="' . $input_name . '">' . $args['value'] . '</textarea>';
 		} else {
-			$content[] = '<input class="cpt-input-' . $args['desc'] . ' cpt-input cpt-input-content" value="' . $args['value'] . '" name="' . $input_name . '" />';
+			$content[] = '<input class="cpt-input cpt-input-content" value="' . $args['value'] . '" name="' . $input_name . '" />';
 		}
 
 		// Wrapper.
