@@ -1,0 +1,60 @@
+* {}
+
+.inside {
+	overflow: auto;
+}
+
+.cpt-box {
+	border          : 1px solid #ddd;
+	border-spacing  : 0;
+	background-color: #f9f9f9;
+	box-sizing      : border-box;
+	overflow        : auto;
+	padding-bottom  : 8px;
+
+	.cpt-input-wrapper {
+		padding-left : 8px;
+		padding-right: 8px;
+	}
+}
+
+.cpt-two-cols {
+	> * {
+		width: 48.75%;
+		float: left;
+
+	}
+
+	> * + * {
+		margin-left: 2.5%;
+
+	}
+}
+
+.cpt-input-wrapper {
+	width     : 100%;
+	box-sizing: border-box;
+
+	& + & {
+		padding-top: 8px;
+	}
+}
+
+.cpt-input {
+	width     : 100%;
+	display   : block;
+	box-sizing: border-box;
+}
+
+.cpt-heading-label-wrapper {
+	margin          : 0;
+	background-color: #f1f1f1;
+	padding         : 8px;
+}
+
+.cpt-label {
+	display      : inline-block;
+	margin-top   : 0;
+	margin-bottom: 0;
+	font-weight  : bold;
+}

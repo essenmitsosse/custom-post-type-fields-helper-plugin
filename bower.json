@@ -1,0 +1,21 @@
+{
+	"name": "divan-events",
+	"description": "wordpress plugin for events for Divan of Song",
+	"main": "js/divan-events.js",
+	"authors": [
+		"marcus <marcus@essenmitsosse.de>"
+	],
+	"license": "MIT",
+	"homepage": "",
+	"private": true,
+	"ignore": [
+		"**/.*",
+		"node_modules",
+		"bower_components",
+		"test",
+		"tests"
+	],
+	"dependencies": {
+		"jquery-ui": "^1.12.1"
+	}
+}
