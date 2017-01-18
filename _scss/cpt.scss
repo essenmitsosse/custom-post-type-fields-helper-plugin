@@ -16,6 +16,11 @@
 		padding-left : 8px;
 		padding-right: 8px;
 	}
+
+	.cpt-heading-label-wrapper {
+		background-color: #f1f1f1;
+		padding         : 8px;
+	}
 }
 
 .cpt-two-cols {
@@ -47,9 +52,7 @@
 }
 
 .cpt-heading-label-wrapper {
-	margin          : 0;
-	background-color: #f1f1f1;
-	padding         : 8px;
+	margin: 0;
 }
 
 .cpt-label {
@@ -57,4 +60,90 @@
 	margin-top   : 0;
 	margin-bottom: 0;
 	font-weight  : bold;
+}
+
+// Adder Element
+.cptea-list-item {
+	overflow: auto;
+
+	&:before {
+		content      : '\2630';
+		font-size    : 2em;
+		display      : inline-block;
+		padding-right: .5em;
+		opacity      : .5;
+		cursor       : ns-resize;
+		float        : left;
+
+		&:hover {
+			opacity: .8;
+		}
+	}
+}
+
+.cptea-close {
+	font-size         : 1.5em;
+	width             : 1.2em;
+	height            : 1.2em;
+	line-height       : 1.2em;
+	font-weight       : bold;
+	cursor            : pointer;
+	border-radius     : 2em;
+	background-color  : #999;
+	color             : #ccc;
+	box-sizing        : border-box;
+	padding           : 0;
+	-webkit-appearance: none;
+	border            : none;
+	display           : inline-block;
+	margin-right      : .5em;
+	float             : left;
+
+	&:hover {
+
+		background-color: #666;
+		color           : #eee;
+	}
+}
+
+.cptea-inputs-wrapper {
+	margin-right: 5em;
+	overflow    : auto;
+}
+
+.cptea-single-input-wrapper {
+	float       : left;
+	margin-right: 1em;
+}
+
+.cptea-single-input-wrapper-url_video {}
+
+.cptea-label {
+	font-weight: bold;
+	display    : block;
+	position   : absolute;
+	width      : 80px;
+	text-align : right;
+}
+
+.cptea-single-input {
+	margin-left: 80px;
+	width      : 220px;
+	box-sizing : border-box;
+}
+
+.cptea-video-field {
+	width     : 100px;
+	background: #ccc;
+	float     : left;
+}
+
+.cptea-single-input-wrapper-inner-video {
+	float      : left;
+	margin-left: 80px;
+
+	.cptea-single-input {
+		margin-left: 0;
+		float      : left;
+	}
 }
