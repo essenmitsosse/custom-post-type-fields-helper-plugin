@@ -1,5 +1,12 @@
 ( function ( $ ) {
 	"use strict";
+	var mediaObject = {
+		title: "Select images to be added to this gallery",
+		button: {
+			text: "Add image to gallery"
+		},
+		multiple: true // Set to true to allow multiple files to be selected
+	};
 
 	function loopThroughArrayAndAddToObject( inputArray, outputObject, outputList, ConstructorFunction, parent, fieldName ) {
 		inputArray.forEach(
@@ -40,7 +47,7 @@
 	}
 
 	function getYoutubeUrl( videoCode ) {
-		return "http://youtube.com/watch?v=" + videoCode;
+		return videoCode === "" ? "" : "http://youtube.com/watch?v=" + videoCode;
 	}
 
 	var setupElementAdders = ( function () {
@@ -58,6 +65,9 @@
 			case "video":
 				this.getInputElement = this.getInputElementVideo;
 				break;
+			case "media":
+				this.getInputElement = this.getInputElementMedia;
+				break;
 			default:
 				this.getInputElement = this.getInputElementText;
 				break;
@@ -71,7 +81,7 @@
 					"for": this.fullName,
 					"class": "cptea-label"
 				} ),
-				$input = this.getInputElement( value ),
+				$input = this.getInputElement( value, data ),
 				$wrapper = $( "<div>", {
 					"class": "cptea-single-input-wrapper"
 				} )
@@ -91,7 +101,7 @@
 		FieldPrototype.prototype.getInputElementTextarea = function ( value ) {
 			return $( "<textarea>", {
 				"name": this.fullName,
-				"class": "cptea-single-input cptea-single-important-input",
+				"class": "cptea-single-input cptea-single-important-input cptea-single-input-textarea",
 				"html": value
 			} );
 		};
@@ -107,7 +117,7 @@
 					"class": "cptea-single-important-input"
 				} ),
 				$input = $( "<input>", {
-					"class": "cptea-single-input cptea-single-video-input",
+					"class": "cptea-single-input cptea-single-input-video",
 					"value": getYoutubeUrl( value )
 				} ),
 				$imageFrame = $( "<img>", {
@@ -123,6 +133,34 @@
 			return $wrapper;
 		};
 
+		FieldPrototype.prototype.getInputElementMedia = function ( value, data ) {
+			var $wrapper = $( "<div>", {
+					"class": "cptea-single-input-wrapper-inner-video"
+				} ),
+				$idSaver = $( "<input>", {
+					"name": this.fullName,
+					"value": data.media.id,
+					"type": "hidden",
+					"class": "cptea-single-important-input"
+				} ),
+				$imageurl = $( "<input>", {
+					"name": this.fullName,
+					"value": data.media.src,
+					"type": "hidden",
+					"class": "cptea-single-important-input"
+				} ),
+				$imageFrame = $( "<img>", {
+					"class": "cptea-video-field",
+					"src": data.media.src
+				} );
+
+			console.log( this.fullName );
+
+			$wrapper.append( $idSaver, $imageurl, $imageFrame );
+
+			return $wrapper;
+		};
+
 		function AdderObject( data, parent ) {
 			this.name = data.name;
 			this.niceName = data[ [ "nice", "name" ].join( "_" ) ];
@@ -130,6 +168,14 @@
 			this.fieldsList = [];
 			this.parent = parent;
 			this.fullName = this.name + "_" + this.parent.name;
+			this.type = data.type || "regular";
+
+			if ( this.type === "media" ) {
+				this.frame = window.wp.media( mediaObject );
+				this.frame.on( "select", this.mediaHasBeenSelected.bind( this ) );
+
+				this.onButtonClick = this.onMediaButtonClick;
+			}
 
 			if ( data.fields ) {
 				loopThroughArrayAndAddToObject( data.fields, this.fields, this.fieldsList, FieldPrototype, this, "name" );
@@ -152,6 +198,36 @@
 			event.preventDefault();
 
 			this.addElementFromData( {} );
+		};
+
+		AdderObject.prototype.onMediaButtonClick = function ( event ) {
+			event.preventDefault();
+
+			if ( this.frame ) {
+				this.frame.open();
+			}
+		};
+
+		AdderObject.prototype.mediaHasBeenSelected = function () {
+			var attachment = this.frame.state()
+				.get( "selection" )
+				.toJSON();
+
+			attachment.forEach( this.addMedia.bind( this ) );
+
+			this.parent.update();
+		};
+
+		AdderObject.prototype.addMedia = function ( attachment ) {
+			var data = {
+				"datatype": this.type,
+				"media": {
+					"id": attachment.id,
+					"src": attachment.url
+				}
+			};
+
+			this.addElementFromData( data );
 		};
 
 		AdderObject.prototype.addElementFromData = function ( data ) {
@@ -205,9 +281,10 @@
 			this.$element
 				.on( "click", ".cptea-close", this.removeElement.bind( this ) )
 				.on( "change", ".cptea-single-important-input", this.update.bind( this ) )
-				.on( "change", ".cptea-single-video-input", this.parseVideoUrl.bind( this ) );
+				.on( "change", ".cptea-single-input-video", this.parseVideoUrl.bind( this ) );
 
 			this.getStructure();
+
 			this.parseData( this.getData() );
 		}
 
@@ -263,15 +340,9 @@
 				$imageFrame = target.$imageFrame,
 				videoCode = getYoutubeCode( $target.val() );
 
-			if ( videoCode === "" ) {
-				$target.val( "No valid Youtube URL" );
-				$hiddenInputField.val( "" );
-				$imageFrame.attr( "src", "" );
-			} else {
-				$target.val( getYoutubeUrl( videoCode ) );
-				$hiddenInputField.val( videoCode );
-				$imageFrame.attr( "src", getYoutubePreviewImageUrl( videoCode ) );
-			}
+			$target.val( getYoutubeUrl( videoCode ) );
+			$hiddenInputField.val( videoCode );
+			$imageFrame.attr( "src", getYoutubePreviewImageUrl( videoCode ) );
 
 			this.update();
 		};

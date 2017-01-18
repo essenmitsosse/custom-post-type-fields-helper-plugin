@@ -64,7 +64,9 @@
 
 // Adder Element
 .cptea-list-item {
-	overflow: auto;
+	overflow     : auto;
+	border-bottom: 1px solid #ccc;
+	padding      : .5em 0;
 
 	&:before {
 		content      : '\2630';
@@ -128,8 +130,12 @@
 
 .cptea-single-input {
 	margin-left: 80px;
-	width      : 220px;
+	width      : 170px;
 	box-sizing : border-box;
+}
+
+.cptea-single-input-textarea {
+	width: 300px;
 }
 
 .cptea-video-field {

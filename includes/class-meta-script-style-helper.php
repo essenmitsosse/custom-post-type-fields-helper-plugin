@@ -39,6 +39,8 @@ class CPT_Meta_Script_Style_Helper {
 	public function __construct( $dependencies ) {
 		$plugin_url = Custom_Post_Types::$plugin_url . '/';
 
+		wp_enqueue_media();
+
 		// Scripts.
 		wp_enqueue_script(
 			'jquery-ui',
