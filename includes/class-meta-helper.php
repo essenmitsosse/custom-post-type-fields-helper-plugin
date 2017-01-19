@@ -224,6 +224,7 @@ class CPT_Meta_Helper {
 			'has_time' => false,
 			'has_checkbox' => false,
 			'checkbox_value' => false,
+			'has_time' => false,
 		), $args );
 
 		if ( null === $args['date'] ) {
@@ -246,14 +247,18 @@ class CPT_Meta_Helper {
 				'has_checkbox' => false,
 				'class' => array( 'cpt-input-date' ),
 			) ) ),
-			self::create_input_field( array_merge( $args, array(
+		);
+
+		if ( false === $args['has_time'] ) {
+			$date_time[] = self::create_input_field( array_merge( $args, array(
 				'desc' => 'time',
 				'nice_name' => _x( 'Time', 'even meta title', 'cpt-event' ),
 				'value' => $args['time'],
 				'has_checkbox' => true,
 				'checkbox_value' => $args['has_time'],
-			) ) ),
-		);
+			) ) );
+		}
+
 		$date_time_wrapper = self::create_div( array( 'cpt-datetime-input-wrapper', 'cpt-input-content' ), $date_time );
 
 		// Content.

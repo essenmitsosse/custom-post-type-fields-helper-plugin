@@ -40,7 +40,9 @@
 	width     : 100%;
 	box-sizing: border-box;
 
-	& + & {
+	& + &,
+	& + .cpt-box,
+	& + .cpt-two-cols {
 		padding-top: 8px;
 	}
 }
@@ -49,17 +51,12 @@
 	width     : 100%;
 	display   : block;
 	box-sizing: border-box;
+	margin    : 0;
 }
 
-.cpt-heading-label-wrapper {
-	margin: 0;
-}
-
-.cpt-label {
-	display      : inline-block;
-	margin-top   : 0;
-	margin-bottom: 0;
-	font-weight  : bold;
+.cpt-heading-label-wrapper h4 {
+	margin : 0;
+	display: inline-block;
 }
 
 // Adder Element
@@ -121,35 +118,61 @@
 .cptea-single-input-wrapper-url_video {}
 
 .cptea-label {
-	font-weight: bold;
-	display    : block;
-	position   : absolute;
-	width      : 80px;
-	text-align : right;
+	display      : block;
+	// position     : absolute;
+	// width        : 80px;
+	// text-align   : right;
+	// float        : left;
+	margin-top   : 0;
+	margin-bottom: 0;
+	font-weight  : bold;
+	// padding-right: .5em;
 }
 
 .cptea-single-input {
-	margin-left: 80px;
-	width      : 170px;
-	box-sizing : border-box;
+	// margin-left: 80px;
+	width     : 170px;
+	box-sizing: border-box;
 }
 
 .cptea-single-input-textarea {
-	width: 300px;
+	width     : 300px;
+	min-height: 4em;
 }
 
-.cptea-video-field {
-	width     : 100px;
+$media-preview-width: 130px;
+
+.cptea-media-field {
+	width     : $media-preview-width;
 	background: #ccc;
-	float     : left;
+	clear     : both;
+	display   : block;
+	// float     : left;
 }
 
-.cptea-single-input-wrapper-inner-video {
-	float      : left;
-	margin-left: 80px;
+.cptea-single-input-video {
+	width: $media-preview-width;
+}
+
+.cptea-single-input-media-wrapper {
+	float: left;
+
+	.cptea-label + & {
+		// margin-left: 80px;
+	}
 
 	.cptea-single-input {
 		margin-left: 0;
 		float      : left;
+	}
+}
+
+.ui-sortable-placeholder {
+	visibility: visible !important;
+	background: #eee;
+	min-height: 70px;
+
+	&:before {
+		display: none;
 	}
 }

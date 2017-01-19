@@ -58,6 +58,8 @@
 			this.fullName = this.name + "_" + this.parent.name;
 			this.type = data.type;
 
+			this.hasLabel = true;
+
 			switch ( this.type ) {
 			case "textarea":
 				this.getInputElement = this.getInputElementTextarea;
@@ -67,6 +69,10 @@
 				break;
 			case "media":
 				this.getInputElement = this.getInputElementMedia;
+				this.hasLabel = false;
+				break;
+			case "media-preview":
+				this.getInputElement = this.getInputElementMediaPreview;
 				break;
 			default:
 				this.getInputElement = this.getInputElementText;
@@ -81,11 +87,16 @@
 					"for": this.fullName,
 					"class": "cptea-label"
 				} ),
-				$input = this.getInputElement( value, data ),
+				$input = this.getInputElement( value ),
 				$wrapper = $( "<div>", {
 					"class": "cptea-single-input-wrapper"
-				} )
-				.append( $label, $input );
+				} );
+
+			if ( this.hasLabel ) {
+				$wrapper.append( $label );
+			}
+
+			$wrapper.append( $input );
 
 			return $wrapper;
 		};
@@ -108,20 +119,20 @@
 
 		FieldPrototype.prototype.getInputElementVideo = function ( value ) {
 			var $wrapper = $( "<div>", {
-					"class": "cptea-single-input-wrapper-inner-video"
+					"class": "cptea-single-input-media-wrapper"
 				} ),
 				$urlSaver = $( "<input>", {
 					"name": this.fullName,
 					"value": value,
 					"type": "hidden",
-					"class": "cptea-single-important-input"
+					"class": "cptea-single-important-input cpt-single-input-video-url"
 				} ),
 				$input = $( "<input>", {
 					"class": "cptea-single-input cptea-single-input-video",
 					"value": getYoutubeUrl( value )
 				} ),
 				$imageFrame = $( "<img>", {
-					"class": "cptea-video-field",
+					"class": "cptea-media-field",
 					"src": getYoutubePreviewImageUrl( value )
 				} );
 
@@ -133,30 +144,33 @@
 			return $wrapper;
 		};
 
-		FieldPrototype.prototype.getInputElementMedia = function ( value, data ) {
-			var $wrapper = $( "<div>", {
-					"class": "cptea-single-input-wrapper-inner-video"
+		FieldPrototype.prototype.getInputElementMedia = function ( value ) {
+			var $idSaver = $( "<input>", {
+				"name": this.fullName,
+				"value": value,
+				"type": "hidden",
+				"class": "cptea-single-important-input"
+			} );
+
+			return $idSaver;
+		};
+
+		FieldPrototype.prototype.getInputElementMediaPreview = function ( value ) {
+			var $imageFrame = $( "<img>", {
+					"class": "cptea-media-field",
+					"src": value
 				} ),
 				$idSaver = $( "<input>", {
 					"name": this.fullName,
-					"value": data.media.id,
+					"value": value,
 					"type": "hidden",
 					"class": "cptea-single-important-input"
 				} ),
-				$imageurl = $( "<input>", {
-					"name": this.fullName,
-					"value": data.media.src,
-					"type": "hidden",
-					"class": "cptea-single-important-input"
-				} ),
-				$imageFrame = $( "<img>", {
-					"class": "cptea-video-field",
-					"src": data.media.src
+				$wrapper = $( "<div>", {
+					"class": "cptea-single-input-media-wrapper"
 				} );
 
-			console.log( this.fullName );
-
-			$wrapper.append( $idSaver, $imageurl, $imageFrame );
+			$wrapper.append( $imageFrame, $idSaver );
 
 			return $wrapper;
 		};
@@ -187,7 +201,7 @@
 		AdderObject.prototype.createButton = function () {
 			this.button = $( "<button>", {
 					"class": "cpt-object-add-button",
-					"html": "+" + this.niceName
+					"html": "add " + this.niceName
 				} )
 				.on( "click", this.onButtonClick.bind( this ) );
 
@@ -220,12 +234,11 @@
 
 		AdderObject.prototype.addMedia = function ( attachment ) {
 			var data = {
-				"datatype": this.type,
-				"media": {
-					"id": attachment.id,
-					"src": attachment.url
-				}
+				"datatype": this.type
 			};
+
+			data[ "id_" + this.name ] = attachment.id;
+			data[ "src_" + this.name ] = attachment.sizes.thumbnail.url;
 
 			this.addElementFromData( data );
 		};
@@ -274,7 +287,8 @@
 					"class": "cptea-list"
 				} )
 				.sortable( {
-					"update": this.update.bind( this )
+					"update": this.update.bind( this ),
+					"forcePlaceholderSize": true
 				} )
 				.appendTo( this.$element );
 
