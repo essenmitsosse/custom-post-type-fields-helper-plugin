@@ -249,7 +249,7 @@ class CPT_Meta_Helper {
 			) ) ),
 		);
 
-		if ( false === $args['has_time'] ) {
+		if ( true === $args['has_time'] ) {
 			$date_time[] = self::create_input_field( array_merge( $args, array(
 				'desc' => 'time',
 				'nice_name' => _x( 'Time', 'even meta title', 'cpt-event' ),

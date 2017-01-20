@@ -109,6 +109,32 @@ class CPT_Meta_Saver {
 	}
 
 	/**
+	 * Takes the end of the last day and saves it.
+	 *
+	 * @param string $meta_name  Name of the meta value.
+	 * @param array  $date_infos List of the names of the dates and if they should be used.
+	 */
+	public static function add_end_of_last_day( $meta_name, $date_infos ) {
+		$last_date = 0;
+
+		foreach ( $date_infos as $date_info ) {
+			if (  true === $date_info[1] || 'on' === self::get_value_from_post( $date_info[1] ) ) {
+				$current_date = self::get_value_from_post( $date_info[0] );
+				if ( $current_date > $last_date ) {
+					$last_date = $current_date;
+				}
+			}
+		}
+
+		$end_of_last_day = DateTime::createFromFormat(
+			'd.m.Y H:i',
+			$last_date . ' 23:59'
+		)->format( 'U' );
+
+		self::add_specific_meta_value( $meta_name, $end_of_last_day );
+	}
+
+	/**
 	 * Adds a meta info with a specific value to the collection.
 	 *
 	 * @param string                $meta_name Name of the meta value.
