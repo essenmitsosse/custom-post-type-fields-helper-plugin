@@ -141,6 +141,10 @@ if ( ! class_exists( 'Custom_Post_Types' ) ) :
 
 		/**
 		 * Returns an instance of a Meta Saver.
+		 *
+		 * @param Number   $post_id                               Id of Post.
+		 * @param Post     $post                                  The post object.
+		 * @param Function $collect_all_meta_information_callback Callback function.
 		 */
 		public static function get_meta_saver( $post_id, $post, $collect_all_meta_information_callback ) {
 			return new CPT_Meta_Saver( $post_id, $post, $collect_all_meta_information_callback );
@@ -151,7 +155,7 @@ if ( ! class_exists( 'Custom_Post_Types' ) ) :
 		 *
 		 * @param array $dependencies List of dependencies.
 		 */
-		public static function set_dependencies( $dependencies ) {
+		public static function set_dependencies( $dependencies = array() ) {
 			new CPT_Meta_Script_Style_Helper( $dependencies );
 		}
 

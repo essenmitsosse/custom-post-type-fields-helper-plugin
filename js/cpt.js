@@ -21,16 +21,18 @@
 	function setupDateInputs() {
 		var $dateInputs = $( ".cpt-input-date" );
 
-		// Setup Datepicker
-		$dateInputs.datepicker( {
-			dateFormat: "dd.mm.yy",
-			showOn: "focus",
-			numberOfMonths: 1,
-			regional: "de"
-		} );
+		if ( $.fn.datepicker ) {
+			// Setup Datepicker
+			$dateInputs.datepicker( {
+				dateFormat: "dd.mm.yy",
+				showOn: "focus",
+				numberOfMonths: 1,
+				regional: "de"
+			} );
+		}
 	}
 
-	function getYoutubeCode( input ) {
+	function getYoutubeCodeFromUrl( input ) {
 		var youtubeCode;
 
 		if ( input.length === 11 ) {
@@ -42,12 +44,50 @@
 		return ( youtubeCode && youtubeCode[ 7 ].length === 11 ) ? youtubeCode[ 7 ] : "";
 	}
 
-	function getYoutubePreviewImageUrl( videoCode ) {
-		return "http://img.youtube.com/vi/" + videoCode + "/0.jpg";
+	function setPreviewImageSrc( $imageFrame, url ) {
+		$imageFrame.attr( "src", url );
 	}
 
-	function getYoutubeUrl( videoCode ) {
+	function getVimeoCodeFromUrl( input ) {
+		var vimeoCode;
+
+		vimeoCode = input.match( /https?:\/\/(?:www\.|player\.)?vimeo.com\/(?:channels\/(?:\w+\/)?|groups\/([^\/]*)\/videos\/|album\/(\d+)\/video\/|video\/|)(\d+)(?:$|\/|\?)/ );
+
+		return vimeoCode[ 3 ];
+	}
+
+	function setYoutubePreviewImageUrlFromVideoCode( $imageFrame, videoCode ) {
+		if ( videoCode ) {
+			setPreviewImageSrc( $imageFrame, "http://img.youtube.com/vi/" + videoCode + "/0.jpg" );
+		}
+	}
+
+	function setVimeoPreviewImageUrlFromVideoCode( $imageFrame, videoCode ) {
+		if ( !videoCode ) {
+			return;
+		}
+
+		$.ajax( {
+			type: "GET",
+			url: "http://vimeo.com/api/v2/video/" + videoCode + ".json",
+			jsonp: "callback",
+			dataType: "jsonp",
+			success: function ( data ) {
+				/* jshint -W106 */
+				if ( data && data[ 0 ] && data[ 0 ].thumbnail_medium ) {
+					setPreviewImageSrc( $imageFrame, data[ 0 ].thumbnail_medium );
+				}
+				/* jshint +W106 */
+			}
+		} );
+	}
+
+	function getYoutubeUrlFromCode( videoCode ) {
 		return videoCode === "" ? "" : "http://youtube.com/watch?v=" + videoCode;
+	}
+
+	function getVimeoUrlFromCode( videoCode ) {
+		return videoCode === "" ? "" : "https://vimeo.com/" + videoCode;
 	}
 
 	var setupElementAdders = ( function () {
@@ -66,6 +106,15 @@
 				break;
 			case "video":
 				this.getInputElement = this.getInputElementVideo;
+				this.getVideoCodeFromUrl = getYoutubeCodeFromUrl;
+				this.getVideoUrlFromCode = getYoutubeUrlFromCode;
+				this.setVideoPreviewImageFromCode = setYoutubePreviewImageUrlFromVideoCode;
+				break;
+			case "vimeo-video":
+				this.getInputElement = this.getInputElementVideo;
+				this.getVideoCodeFromUrl = getVimeoCodeFromUrl;
+				this.getVideoUrlFromCode = getVimeoUrlFromCode;
+				this.setVideoPreviewImageFromCode = setVimeoPreviewImageUrlFromVideoCode;
 				break;
 			case "media":
 				this.getInputElement = this.getInputElementMedia;
@@ -129,15 +178,18 @@
 				} ),
 				$input = $( "<input>", {
 					"class": "cptea-single-input cptea-single-input-video",
-					"value": getYoutubeUrl( value )
+					"value": this.getVideoUrlFromCode( value )
 				} ),
 				$imageFrame = $( "<img>", {
-					"class": "cptea-media-field",
-					"src": getYoutubePreviewImageUrl( value )
-				} );
+					"class": "cptea-media-field"
+				} ),
+				inputDom = $input[ 0 ];
 
-			$input[ 0 ].$hiddenInputField = $urlSaver;
-			$input[ 0 ].$imageFrame = $imageFrame;
+			this.setVideoPreviewImageFromCode( $imageFrame, value );
+
+			inputDom.$hiddenInputField = $urlSaver;
+			inputDom.$imageFrame = $imageFrame;
+			inputDom.object = this;
 
 			$wrapper.append( $urlSaver, $input, $imageFrame );
 
@@ -156,19 +208,22 @@
 		};
 
 		FieldPrototype.prototype.getInputElementMediaPreview = function ( value ) {
-			var $imageFrame = $( "<img>", {
+			var valueObject = typeof value === "string" ? JSON.parse( value ) : value,
+				$imageFrame = $( "<img>", {
 					"class": "cptea-media-field",
-					"src": value
+					"src": valueObject.thumbnail.url
 				} ),
 				$idSaver = $( "<input>", {
 					"name": this.fullName,
-					"value": value,
+					"value": "!" + JSON.stringify( valueObject ),
 					"type": "hidden",
 					"class": "cptea-single-important-input"
 				} ),
 				$wrapper = $( "<div>", {
 					"class": "cptea-single-input-media-wrapper"
 				} );
+
+			console.log( valueObject );
 
 			$wrapper.append( $imageFrame, $idSaver );
 
@@ -227,6 +282,8 @@
 				.get( "selection" )
 				.toJSON();
 
+			console.log( attachment );
+
 			attachment.forEach( this.addMedia.bind( this ) );
 
 			this.parent.update();
@@ -238,7 +295,7 @@
 			};
 
 			data[ "id_" + this.name ] = attachment.id;
-			data[ "src_" + this.name ] = attachment.sizes.thumbnail.url;
+			data[ "srcs_" + this.name ] = attachment.sizes;
 
 			this.addElementFromData( data );
 		};
@@ -347,16 +404,17 @@
 			this.update();
 		};
 
-		ElementAdder.prototype.parseVideoUrl = function () {
+		ElementAdder.prototype.parseVideoUrl = function ( event ) {
 			var target = event.target || event.currentTarget,
 				$target = $( target ),
 				$hiddenInputField = target.$hiddenInputField,
 				$imageFrame = target.$imageFrame,
-				videoCode = getYoutubeCode( $target.val() );
+				object = target.object,
+				videoCode = object.getVideoCodeFromUrl( $target.val() );
 
-			$target.val( getYoutubeUrl( videoCode ) );
+			$target.val( object.getVideoUrlFromCode( videoCode ) );
 			$hiddenInputField.val( videoCode );
-			$imageFrame.attr( "src", getYoutubePreviewImageUrl( videoCode ) );
+			object.setVideoPreviewImageFromCode( $imageFrame, videoCode );
 
 			this.update();
 		};
@@ -385,9 +443,17 @@
 				data.push( itemData );
 
 				$inputs.each( function ( nr, item ) {
-					var $item = $( item );
+					var $item = $( item ),
+						value = $item.val();
 
-					itemData[ $item.attr( "name" ) ] = $item.val();
+					/* If value is marked with an "!" it’s a JSON string.
+					 * We need to parse it first, so we don’t double stringify it.
+					 */
+					if ( value[ 0 ] === "!" ) {
+						value = JSON.parse( value.substring( 1 ) );
+					}
+
+					itemData[ $item.attr( "name" ) ] = value;
 				} );
 
 			} );
@@ -408,4 +474,4 @@
 		setupDateInputs();
 		setupElementAdders();
 	} );
-} )( jQuery );
+} )( jQuery );;

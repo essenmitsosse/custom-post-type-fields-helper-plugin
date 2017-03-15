@@ -41,22 +41,30 @@ class CPT_Meta_Script_Style_Helper {
 
 		wp_enqueue_media();
 
-		// Scripts.
-		wp_enqueue_script(
-			'jquery-ui',
-			$plugin_url . 'bower_components/jquery-ui/jquery-ui.min.js',
-			array( 'jquery' )
-		);
-		wp_enqueue_script(
-			'ui-datepicker',
-			$plugin_url . 'bower_components/jquery-ui/ui/widgets/datepicker.js',
-			array( 'jquery-ui' )
-		);
-		wp_enqueue_script(
-			'ui-datepicker-de',
-			$plugin_url . 'bower_components/jquery-ui/ui/i18n/datepicker-de.js',
-			array( 'ui-datepicker' )
-		);
+		// jQuery UI.
+		if ( in_array( 'ui-datepicker', $dependencies, true ) ) {
+			// Scripts.
+			wp_enqueue_script(
+				'jquery-ui',
+				$plugin_url . 'bower_components/jquery-ui/jquery-ui.min.js',
+				array( 'jquery' )
+			);
+			wp_enqueue_script(
+				'ui-datepicker',
+				$plugin_url . 'bower_components/jquery-ui/ui/widgets/datepicker.js',
+				array( 'jquery-ui' )
+			);
+			wp_enqueue_script(
+				'ui-datepicker-de',
+				$plugin_url . 'bower_components/jquery-ui/ui/i18n/datepicker-de.js',
+				array( 'ui-datepicker' )
+			);
+
+			// Styles.
+			wp_enqueue_style( 'ui-core',  $plugin_url . 'bower_components/jquery-ui/themes/base/jquery-ui.min.css' );
+		}
+
+		// General Scripts.
 		wp_enqueue_script(
 			'cpt-script',
 			$plugin_url . 'js/cpt.js',
@@ -64,8 +72,7 @@ class CPT_Meta_Script_Style_Helper {
 			'0.0.1'
 		);
 
-		// Styles.
-		wp_enqueue_style( 'ui-core',  $plugin_url . 'css/jquery-ui.min.css' );
-		wp_enqueue_style( 'divan-events', $plugin_url . 'css/cpt.css' );
+		// General Styles.
+		wp_enqueue_style( 'custom-post-type-admin', $plugin_url . 'css/cpt.css' );
 	}
 }

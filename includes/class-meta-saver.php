@@ -50,6 +50,7 @@ class CPT_Meta_Saver {
 		 * Verify this came from the our screen and with proper authorization,
 		 * because save_post can be triggered at other times.
 		 */
+
 		if ( self::check_if_something_is_wrong( $post ) ) {
 			return $post->ID;
 		}
@@ -57,6 +58,7 @@ class CPT_Meta_Saver {
 		call_user_func( $collect_all_meta_information_callback, $this );
 
 		self::save_meta_information( $post->ID );
+
 	}
 
 	/**
@@ -153,22 +155,17 @@ class CPT_Meta_Saver {
 	 * @param post $post The post.
 	 */
 	public function check_if_something_is_wrong( $post ) {
+		$nonce_name = $post->post_type . '_meta_nonce';
+
 		if ( ! (
-			isset( $_POST['event_meta_nonce'] ) &&
-			wp_verify_nonce( wp_unslash( $_POST['event_meta_nonce'] ), 'event_meta_nonce' )
+			isset( $_POST[ $nonce_name ] ) &&
+			wp_verify_nonce( wp_unslash( $_POST[ $nonce_name ] ), $nonce_name )
 		) ) {
 			return true;
 		}
 
 		// Is the user allowed to edit the post or page?
 		if ( ! current_user_can( 'edit_post', $post->ID ) ) {
-			return true;
-		}
-
-		global $post_type;
-
-		// Are we on a post of the right type?
-		if ( ! ( 'event' === $post_type ) ) {
 			return true;
 		}
 
