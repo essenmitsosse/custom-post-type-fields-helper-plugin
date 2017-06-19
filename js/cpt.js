@@ -453,7 +453,8 @@
 						value = JSON.parse( value.substring( 1 ) );
 					}
 
-					itemData[ $item.attr( "name" ) ] = value;
+					itemData[ $item.attr( "name" ) ] = $item.val()
+						.replace( "'", "`" );
 				} );
 
 			} );

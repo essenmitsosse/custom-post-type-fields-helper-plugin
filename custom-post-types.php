@@ -129,9 +129,9 @@ if ( ! class_exists( 'Custom_Post_Types' ) ) :
 		/**
 		 * Returns an instance of a Meta Getter.
 		 */
-		public static function get_meta_getter() {
-			if ( false === self::$meta_getter_init ) {
-				self::$meta_getter = new CPT_Meta_Getter();
+		public static function get_meta_getter( $id = false ) {
+			if ( false === self::$meta_getter_init || $id !== false ) {
+				self::$meta_getter = new CPT_Meta_Getter( $id );
 				self::$meta_getter->get_nonce();
 				self::$meta_getter_init = true;
 			}

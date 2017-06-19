@@ -69,7 +69,7 @@ class CPT_Meta_Script_Style_Helper {
 			'cpt-script',
 			$plugin_url . 'js/cpt.js',
 			array( 'jquery' ),
-			'0.0.1'
+			'0.0.5'
 		);
 
 		// General Styles.
